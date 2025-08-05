@@ -124,9 +124,7 @@ python training.py   # Train routing classifier
 ## Notes
 
 ### Performance Considerations
-- **Processing Time**: ~1200 flood points may require several hours for full NLCD analysis
-- **Memory Usage**: NLCD files are ~4GB each but only buffer areas are loaded into memory
-- **Parallel Processing**: Consider implementing multiprocessing for large datasets
+
 
 ### Data Quality Notes
 - **Missing Years**: Script automatically uses closest available NLCD year when exact match unavailable
