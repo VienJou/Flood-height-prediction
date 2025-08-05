@@ -1,112 +1,140 @@
 # Flood Height Prediction Research Project
 
-This repository contains code and data for analyzing flood height prediction using National Land Cover Database (NLCD) impervious surface data and landscape metrics around flood gauge locations.
+This repository contains code and data for analyzing flood height prediction using geospatial features including National Land Cover Database (NLCD) impervious surface data, digital elevation models (DEM), and machine learning routing algorithms. The project extracts landscape metrics around flood gauge locations and develops predictive models using multi-route neural network architectures.
 
 ## Project Overview
 
-The project extracts landscape metrics from NLCD impervious surface layers within 1.5km square buffers around flood gauge points. It performs multi-temporal analysis by matching flood events to their corresponding year's NLCD data (2016-2024).
+The project combines multiple data sources and analytical approaches:
+1. **Feature Extraction**: Extracts landscape metrics from NLCD impervious surface layers and DEM data within 1.5km square buffers around flood gauge points
+2. **Multi-temporal Analysis**: Matches flood events to their corresponding year's NLCD data (2016-2024)
+3. **Machine Learning**: Implements routing-based neural network architectures for flood prediction modeling
 
-## File Structure
+## Repository Structure
 
-### Input Data Paths
+### Folders
+- **`data/`** - Contains processed feature datasets and analysis outputs
+- **`routing/`** - Machine learning routing algorithms and training pipelines
+- **`.idea/`** - IDE configuration files (IntelliJ/PyCharm)
 
-#### Flood Point Data
-- **Local (Windows)**: `C:\Users\alekb\Downloads\filtered_flooding_points_over_one_day_nopr.shp`
-- **Anvil Cluster**: `/anvil/projects/x-cis250634/team5/shp/filtered_flooding_points_over_one_day_nopr.shp`
+## Code Files Overview
 
-#### NLCD Impervious Surface Data
-- **Local (Windows)**: `C:\Users\alekb\Downloads\Annual_NLCD_ImpDsc_[YEAR]_CU_C1V1.tif`
-- **Anvil Cluster**: `/anvil/projects/x-cis250634/team5/data_0718/Annual_NLCD_ImpDsc_[YEAR]_CU_C1V1.tif`
+| File | Last Updated | Description |
+|------|-------------|-------------|
+| **NLCD_Extract_v0.1.0.py** | 2025-08-05 | Main script for extracting NLCD impervious surface features around flood points. Creates 1.5km square buffers, processes multi-year data (2016-2024), calculates landscape metrics including area percentages and core area indices. |
+| **NLCD_Extract_v0.1.0_test.ipynb** | 2025-08-05 | Jupyter notebook for testing and prototyping the NLCD extraction workflow. Contains experimental code and visualizations for buffer creation and metrics calculation. |
+| **dem_features.ipynb** | 2025-08-05 | Jupyter notebook for extracting digital elevation model (DEM) features around flood points. Processes topographic characteristics and terrain metrics. |
+| **routing/routing.py** | 2025-08-05 | Core routing functionality for multi-route neural network architecture. Defines feature routing mappings and data preparation pipelines for ML models. |
+| **routing/gs_routes.py** | 2025-08-05 | Grid search implementation for testing all possible feature-route combinations in the routing classifier. Generates and evaluates different routing strategies. |
+| **routing/training.py** | 2025-08-05 | Training pipeline for routing-based neural network models. Includes model training, validation, and dummy data generation functions. |
+| **CLAUDE.md** | 2025-08-05 | Project documentation and guidance for Claude Code AI assistant. Contains architecture overview, dependencies, and development notes. |
+| **README.md** | 2025-08-05 | This file - comprehensive project documentation including file descriptions, usage instructions, and technical details. |
 
-Available years: 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024
+### Major Changes Summary
+- **v0.1.0 (Initial)**: Multi-year NLCD processing, buffer creation, landscape metrics
+- **Recent Updates**: Added DEM feature extraction, routing-based ML architecture, improved error handling and CRS transformations
 
-### Output Data
-- **Results**: `data/imp_surface_features.csv`
-- **Contains**: Landscape metrics for each flood point buffer
+## Input and Output Files
 
-## File Contents
+### Input Data Sources
 
-### Input Files
+#### External Input Files (Not in Repository)
+| File | Size | Used By | Source | Description |
+|------|------|---------|--------|-------------|
+| **filtered_flooding_points_over_one_day_nopr.shp** | N/A | NLCD_Extract_v0.1.0.py | TBD | Flood gauge points with ID, peak_date, and geometry attributes |
+| **Annual_NLCD_ImpDsc_[YEAR]_CU_C1V1.tif** | ~4GB each | NLCD_Extract_v0.1.0.py | USGS National Land Cover Database | Annual impervious surface data (2016-2024), 30m resolution |
+| **DEM raster files** | Varies | dem_features.ipynb | TBD | Digital elevation model data for topographic features |
 
-#### `filtered_flooding_points_over_one_day_nopr.shp`
-Shapefile containing flood gauge points with attributes:
-- `ID`: Unique identifier for each flood point
-- `peak_date`: Date/time of peak flood event  
-- `geometry`: Point geometry (lat/lon coordinates)
-- Additional flood event metadata (height, quality flags, etc.)
+### Output Data Files (In Repository)
 
-#### `Annual_NLCD_ImpDsc_[YEAR]_CU_C1V1.tif`
-Annual NLCD impervious surface raster files:
-- **Resolution**: 30m pixels
-- **Coverage**: Continental United States
-- **Values**: 
-  - 1 = Developed, Open Space (20-49% impervious)
-  - 2 = Developed, Low Intensity (50-79% impervious)
-  - Other values = Non-impervious surfaces
-- **CRS**: Typically Albers Equal Area Conic
+#### `data/` Directory
+| File | Size | Generated By | Description |
+|------|------|-------------|-------------|
+| **imp_surface_features.csv** | 127 KB | NLCD_Extract_v0.1.0.py | NLCD-derived landscape metrics for each flood point including area percentages, core area indices, and impervious surface characteristics |
+| **dem_features.csv** | 89 KB | dem_features.ipynb | DEM-derived topographic features including elevation, slope, aspect, and terrain roughness metrics |
 
-### Output Files
 
-#### `imp_surface_features.csv`
-Processed landscape metrics with columns:
+### Feature Columns
+
+#### imp_surface_features.csv
 - `ID`: Flood point identifier
-- `peak_date`: Original flood event date
+- `peak_date`: Original flood event date  
 - `nlcd_year`: NLCD data year used for analysis
 - `total_area_km2`: Total buffer area in km²
-- `pct_area_1`: Percentage of buffer with impervious class 1
-- `pct_area_2`: Percentage of buffer with impervious class 2
-- `area_km_1`: Absolute area (km²) of impervious class 1
-- `area_km_2`: Absolute area (km²) of impervious class 2
-- `cai_1`: Core Area Index for class 1 (fragmentation metric)
-- `cai_2`: Core Area Index for class 2 (fragmentation metric)
+- `pct_area_1`: % of buffer with low-intensity impervious surface (20-49%)
+- `pct_area_2`: % of buffer with medium-intensity impervious surface (50-79%)
+- `area_km_1`, `area_km_2`: Absolute areas (km²) for each impervious class
+- `cai_1`, `cai_2`: Core Area Index (landscape fragmentation metric)
 
-## Code Versions and Changes
+## Technical Implementation
 
-| Version | Date | Major Changes | Notes |
-|---------|------|---------------|-------|
-| v0.1.0 | 2025-01-XX | Initial implementation | - Multi-year NLCD processing<br>- 1.5km square buffer creation<br>- Landscape metrics calculation<br>- Year-based file matching |
-| v0.1.0-fix1 | 2025-01-XX | Fixed date parsing error | - Fixed `extract_year_from_date()` to handle "M/D/YYYY H:MM:SS AM/PM" format<br>- Fixed None value handling in year selection<br>- Eliminated "unsupported operand type" errors |
-| v0.1.0-fix2 | 2025-01-XX | Improved CRS handling | - Explicit reprojection to EPSG:5070 for accurate meter-based buffers<br>- Enhanced CRS transformation logging<br>- Verified buffer creation in meters not degrees |
-| v0.1.0-clean | 2025-01-XX | Code cleanup and path management | - Removed unnecessary imports<br>- Added dual path support (Windows/Anvil)<br>- Improved error handling and progress reporting<br>- Consolidated helper functions |
+### NLCD Processing Workflow
+1. **Load flood points** from shapefile and extract years from peak_date
+2. **Create 1.5km square buffers** in projected coordinates (EPSG:5070) for accurate metric distances
+3. **Match flood events** to corresponding year's NLCD data (2016-2024)
+4. **Extract raster data** within buffers using spatial masking
+5. **Recode NLCD values** (1→1, 2→2, others→0) and calculate landscape metrics
+6. **Export structured results** to CSV files
 
-## Technical Details
+### Machine Learning Architecture
+- **Multi-route Neural Networks**: Routes different feature types (DEM, Imagery, Rainfall, Soil, Landuse, Vegetation, Impervious Surface) through specialized processing paths
+- **Grid Search Optimization**: Tests all possible feature-route combinations to find optimal routing strategies
+- **PyTorch Implementation**: Uses deep learning frameworks for model training and validation
 
-### Processing Workflow
-1. **Load flood points** from shapefile
-2. **Extract years** from peak_date column using pandas datetime parsing
-3. **Create 1.5km square buffers** around each point in projected coordinates (EPSG:5070)
-4. **Match flood events** to corresponding year's NLCD data
-5. **Extract raster data** within each buffer using spatial masking
-6. **Recode NLCD values** (1→1, 2→2, others→0)
-7. **Calculate landscape metrics** using pylandstats
-8. **Export results** to CSV
+### Key Technical Features
+- **Memory Efficient**: Windowed reading loads only buffer-intersecting pixels
+- **Multi-temporal Analysis**: Matches flood events to appropriate NLCD year
+- **Accurate Geospatial Processing**: EPSG:5070 projection ensures proper metric calculations
+- **Robust Error Handling**: Graceful handling of missing data and processing failures
+- **Cross-platform Support**: Windows and Linux/Anvil cluster compatibility
 
-### Key Features
-- **Memory efficient**: Uses windowed reading to load only buffer-intersecting pixels
-- **Multi-temporal**: Matches flood events to appropriate NLCD year
-- **Accurate buffering**: Ensures buffers are created in meters using projected CRS
-- **Robust error handling**: Gracefully handles missing data and processing errors
-- **Cross-platform**: Supports both Windows and Linux/Anvil environments
+## Dependencies
 
-### Dependencies
-- `rasterio`: Geospatial raster data I/O
-- `geopandas`: Vector geospatial data handling
-- `pandas`: Data manipulation and analysis
-- `numpy`: Numerical operations
-- `pylandstats`: Landscape metrics calculation
-- `shapely`: Geometric operations
+### Core Geospatial Libraries
+- `rasterio` - Geospatial raster data I/O and processing
+- `geopandas` - Vector geospatial data handling and operations
+- `pylandstats` - Landscape ecology metrics calculation
+- `shapely` - Geometric operations and spatial analysis
 
-## Usage
+### Data Science & ML Libraries  
+- `pandas` - Data manipulation and analysis
+- `numpy` - Numerical computations
+- `torch` - PyTorch deep learning framework
+- `matplotlib` - Data visualization and plotting
+- `tqdm` - Progress bar displays
 
-1. **Configure file paths** for your environment (Windows vs Anvil)
-2. **Ensure NLCD files are available** for the years present in your flood data
-3. **Run the script**: `python NLCD_Extract_v0.1.0.py`
-4. **Check output**: Results saved to `data/imp_surface_features.csv`
+## Usage Instructions
+
+### NLCD Feature Extraction
+```bash
+python NLCD_Extract_v0.1.0.py
+```
+
+### DEM Feature Processing
+```bash
+jupyter notebook dem_features.ipynb
+```
+
+### ML Model Training
+```bash
+cd routing/
+python gs_routes.py  # Grid search for optimal routing
+python training.py   # Train routing classifier
+```
 
 ## Notes
 
-- Processing time scales with number of flood points (~1200 points may take several hours)
-- NLCD files are large (~4GB each) but only small portions are loaded per buffer
-- Script automatically handles coordinate system transformations
-- Missing NLCD years will use the closest available year
-- Core Area Index represents landscape fragmentation (higher = less fragmented)
+### Performance Considerations
+- **Processing Time**: ~1200 flood points may require several hours for full NLCD analysis
+- **Memory Usage**: NLCD files are ~4GB each but only buffer areas are loaded into memory
+- **Parallel Processing**: Consider implementing multiprocessing for large datasets
+
+### Data Quality Notes
+- **Missing Years**: Script automatically uses closest available NLCD year when exact match unavailable
+- **Coordinate Systems**: Automatic handling of CRS transformations between geographic and projected coordinates
+- **Core Area Index**: Higher values indicate less fragmented landscapes (better habitat connectivity)
+
+### Development Notes
+- **File Paths**: Currently configured for Windows environment with alternative Linux paths commented out
+- **Version Control**: Major processing steps are logged and versions tracked for reproducibility  
+- **Error Logging**: Comprehensive error handling preserves processing continuity for large datasets
+- **Modular Design**: Separate modules for routing, training, and feature extraction allow independent development and testing
