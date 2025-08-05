@@ -40,7 +40,7 @@ The project combines multiple data sources and analytical approaches:
 #### External Input Files (Not in Repository)
 | File | Size | Used By | Source | Description |
 |------|------|---------|--------|-------------|
-| **filtered_flooding_points_over_one_day_nopr.shp** | N/A | NLCD_Extract_v0.1.0.py | TBD | Flood gauge points with ID, peak_date, and geometry attributes |
+| **filtered_flooding_points_over_one_day_nopr.shp** | N/A | NLCD_Extract_v0.1.0.py | TBD | High water mark points with ID, peak_date, and geometry attributes |
 | **Annual_NLCD_ImpDsc_[YEAR]_CU_C1V1.tif** | ~4GB each | NLCD_Extract_v0.1.0.py | USGS National Land Cover Database | Annual impervious surface data (2016-2024), 30m resolution |
 | **DEM raster files** | Varies | dem_features.ipynb | TBD | Digital elevation model data for topographic features |
 
