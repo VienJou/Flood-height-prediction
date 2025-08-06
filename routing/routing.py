@@ -132,7 +132,7 @@ class Routing_Classifier(nn.Module):
         # Shape after attention: (batch_size, 3, 1) -> flatten to (batch_size, 3)
         attn_output_flat = attn_output.squeeze(2)
         
-        fusion_out = self.fusion_fc(attn_output_flat)
-        final_output = torch.sigmoid(fusion_out)
+        # For regression, we don't apply a sigmoid activation
+        final_output = self.fusion_fc(attn_output_flat)
 
         return final_output.squeeze(-1)
