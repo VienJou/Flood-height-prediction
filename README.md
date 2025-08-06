@@ -43,7 +43,7 @@ The project consists of three main components:
 | File | Size | Used By | Source | Description |
 |------|------|---------|--------|-------------|
 | **filtered_flooding_points_over_one_day*.shp** | N/A | NLCD_Extract_v0.1.0.py, Calculate_HWM_Depth_v1.0.ipynb | USGS | High water mark points with ID, peak_date, elev_ft, and geometry attributes |
-| **Annual_NLCD_ImpDsc_[YEAR]_CU_C1V1.tif** | ~4GB each | NLCD_Extract_v0.1.0.py | USGS National Land Cover Database | Annual impervious surface data (2016-2024), 30m resolution |
+| **Annual_NLCD_ImpDsc_{YEAR}_CU_C1V1.tif** | ~4GB each | NLCD_Extract_v0.1.0.py | USGS National Land Cover Database | Annual impervious surface data (2016-2024), 30m resolution |
 | **{ID}_USGS_3DEP_{YEAR}.tif** | Varies | Calculate_HWM_Depth_v1.0.ipynb, dem_features.ipynb | USGS 3DEP | Individual DEM raster files named by flood point ID and year, 10m resolution |
 | **flooding_dataset_with_precipitation_0801_with_height_above.json** | N/A | dem_features.ipynb | Project metadata | JSON file containing flood point metadata including Sentinel-1 data availability flags |
 
