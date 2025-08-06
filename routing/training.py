@@ -16,11 +16,16 @@ def train(model, train_loader, optimizer, criterion, device='cpu'):
     model.train()
     total_loss = 0.0
     
-    for data, targets in tqdm.tqdm(train_loader, desc="Training", disable=not Verbose):
-        data, targets = data.to(device), targets.to(device)
+    for r1_data, r2_data, r3_data, targets in tqdm.tqdm(train_loader, desc="Training", disable=not Verbose):
+        route_data = {
+            'Route1': r1_data.to(device),
+            'Route2': r2_data.to(device),
+            'Route3': r3_data.to(device)
+        }
+        targets = targets.to(device)
         
         optimizer.zero_grad()
-        outputs = model(data)
+        outputs = model(route_data)
         
         loss = criterion(outputs, targets.float())
         loss.backward()
@@ -34,29 +39,27 @@ def train(model, train_loader, optimizer, criterion, device='cpu'):
 def evaluate(model, test_loader, criterion, device='cpu'):
     model.eval()
     total_loss = 0.0
-    correct = 0
-    total = 0
     
     with torch.no_grad():
-        for data, targets in tqdm.tqdm(test_loader, desc="Evaluating"):
-            data, targets = data.to(device), targets.to(device)
+        for r1_data, r2_data, r3_data, targets in tqdm.tqdm(test_loader, desc="Evaluating", disable=not Verbose):
+            route_data = {
+                'Route1': r1_data.to(device),
+                'Route2': r2_data.to(device),
+                'Route3': r3_data.to(device)
+            }
+            targets = targets.to(device)
             
-            outputs = model(data)
+            outputs = model(route_data)
             loss = criterion(outputs, targets.float())
-            
-            predicted = (outputs > 0.5).float()
-            total += targets.size(0)
-            correct += (predicted == targets).sum().item()
             
             total_loss += loss.item()
     
-    accuracy = correct / total
-    return total_loss / len(test_loader), accuracy
+    return total_loss / len(test_loader)
 
 
 def train_model(model, train_loader, val_loader=None, epochs=10, learning_rate=0.001, device='cpu', optimizer_type='Adam'):
     """
-    Complete training pipeline with configurable hyperparameters
+    Complete training pipeline for regression.
     """
     # Choose optimizer
     if optimizer_type == 'Adam':
@@ -66,11 +69,10 @@ def train_model(model, train_loader, val_loader=None, epochs=10, learning_rate=0
     else:
         optimizer = optim.Adam(model.parameters(), lr=learning_rate)
     
-    criterion = nn.BCELoss()
+    criterion = nn.MSELoss()
     
     train_losses = []
     val_losses = []
-    val_accuracies = []
     
     model.to(device)
     
@@ -87,25 +89,33 @@ def train_model(model, train_loader, val_loader=None, epochs=10, learning_rate=0
         
         # Validation
         if val_loader is not None:
-            val_loss, val_acc, _, _ = evaluate(model, val_loader, criterion, device)
+            val_loss = evaluate(model, val_loader, criterion, device)
             val_losses.append(val_loss)
-            val_accuracies.append(val_acc)
             if Verbose:
-                print(f"Val Loss: {val_loss:.4f}, Val Accuracy: {val_acc:.4f}")
+                print(f"Val Loss: {val_loss:.4f}")
 
     return {
         'train_losses': train_losses,
         'val_losses': val_losses,
-        'val_accuracies': val_accuracies
     }
 
 
-def create_dummy_data_loader(batch_size=32, num_samples=1000):
+def create_dummy_data_loader(model, batch_size=32, num_samples=1000):
     """
-    Create dummy data loader for testing
+    Create dummy data loader for testing, compatible with the model's expected input.
     """
-    features = torch.randn(num_samples, 10)
-    labels = torch.randint(0, 2, (num_samples,)).float()
+    # Get input sizes from the model's stored data shapes
+    route1_size = model.data['Route1'].shape[1]
+    route2_size = model.data['Route2'].shape[1]
+    route3_size = model.data['Route3'].shape[1]
+
+    # Create dummy tensors for each route
+    r1_features = torch.randn(num_samples, route1_size)
+    r2_features = torch.randn(num_samples, route2_size)
+    r3_features = torch.randn(num_samples, route3_size)
     
-    dataset = TensorDataset(features, labels)
+    # Dummy labels for regression
+    labels = torch.randn(num_samples)
+    
+    dataset = TensorDataset(r1_features, r2_features, r3_features, labels)
     return DataLoader(dataset, batch_size=batch_size, shuffle=True)
