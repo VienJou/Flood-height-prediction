@@ -175,10 +175,14 @@ def run_comprehensive_grid_search(max_feature_combinations=None, save_every=5,
     all_feature_combinations = generate_all_feature_route_combinations()
     
     hyperparameter_grid = {
-        'learning_rate': [0.001, 0.01], 'batch_size': [16, 32], 'epochs': [5, 10],
-        'lstm_hidden_size': [20, 32], 'lstm_num_layers': [1, 2], 'dropout_rate': [0.1, 0.2],
-        'conv_channels': [(16, 32), (32, 64)], 'fc_hidden_size': [64, 128],
-        'optimizer_type': ['Adam', 'SGD']
+        'learning_rate': [0.001, 0.005, 0.01],
+        'batch_size': [16, 32, 64],
+        'epochs': [10, 20],
+        'p2_hidden_size': [32, 64, 128],
+        'p3_hidden_size_1': [64, 128, 256],
+        'p3_hidden_size_2': [32, 64, 128],
+        'dropout_rate': [0.2, 0.3, 0.5],
+        'optimizer_type': ['Adam', 'SGD', 'RMSprop']
     }
     param_names = list(hyperparameter_grid.keys())
     param_values = list(hyperparameter_grid.values())
