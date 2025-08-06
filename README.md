@@ -1,13 +1,13 @@
 # Flood Height Prediction Research Project
 
-This repository contains code and data for analyzing flood height prediction using geospatial features including National Land Cover Database (NLCD) impervious surface data, digital elevation models (DEM), and machine learning routing algorithms. The project extracts landscape metrics around flood gauge locations and develops predictive models using multi-route neural network architectures.
+This repository contains code and data for predicting flood heights using machine learning approaches.
 
 ## Project Overview
 
-The project combines multiple data sources and analytical approaches:
-1. **Feature Extraction**: Extracts landscape metrics from NLCD impervious surface layers and DEM data within 1.5km square buffers around flood gauge points
-2. **Multi-temporal Analysis**: Matches flood events to their corresponding year's NLCD data (2016-2024)
-3. **Machine Learning**: Implements routing-based neural network architectures for flood prediction modeling
+The project consists of three main components:
+1. **Feature Extraction**: Extracts landscape and topographic features around flood locations
+2. **Target Generation**: Calculates flood depths from elevation measurements  
+3. **Machine Learning**: Uses data fusion and machine learning to predict flood depths
 
 ## Repository Structure
 
@@ -20,18 +20,20 @@ The project combines multiple data sources and analytical approaches:
 
 | File | Last Updated | Description |
 |------|-------------|-------------|
-| **NLCD_Extract_v0.1.0.py** | 2025-08-05 | Main script for extracting NLCD impervious surface features around flood points. Creates 1.5km square buffers, processes multi-year data (2016-2024), calculates landscape metrics including area percentages and core area indices. |
-| **NLCD_Extract_v0.1.0_test.ipynb** | 2025-08-05 | Jupyter notebook for testing and prototyping the NLCD extraction workflow. Contains experimental code and visualizations for buffer creation and metrics calculation. |
-| **dem_features.ipynb** | 2025-08-05 | Jupyter notebook for extracting digital elevation model (DEM) features around flood points. Processes topographic characteristics and terrain metrics. |
-| **routing/routing.py** | 2025-08-05 | Core routing functionality for multi-route neural network architecture. Defines feature routing mappings and data preparation pipelines for ML models. |
-| **routing/gs_routes.py** | 2025-08-05 | Grid search implementation for testing all possible feature-route combinations in the routing classifier. Generates and evaluates different routing strategies. |
-| **routing/training.py** | 2025-08-05 | Training pipeline for routing-based neural network models. Includes model training, validation, and dummy data generation functions. |
-| **CLAUDE.md** | 2025-08-05 | Project documentation and guidance for Claude Code AI assistant. Contains architecture overview, dependencies, and development notes. |
-| **README.md** | 2025-08-05 | This file - comprehensive project documentation including file descriptions, usage instructions, and technical details. |
+| **NLCD_Extract_v0.1.0.py** | 2025-08-06 | Main script for extracting NLCD impervious surface features around flood points. Creates 1.5km square buffers, processes multi-year data (2016-2024), calculates landscape metrics including area percentages and core area indices. |
+| **NLCD_Extract_v0.1.0_test.ipynb** | 2025-08-06 | Jupyter notebook for testing and prototyping the NLCD extraction workflow. Contains experimental code and visualizations for buffer creation and metrics calculation. |
+| **dem_features.ipynb** | 2025-08-06 | Jupyter notebook for extracting digital elevation model (DEM) features around flood points. Processes topographic characteristics and terrain metrics. |
+| **Calculate_HWM_Depth_v1.0.ipynb** | 2025-08-06 | New Jupyter notebook for calculating High Water Mark (HWM) depth measurements. Processes flood depth data and generates target variable for machine learning models. |
+| **routing/routing.py** | 2025-08-06 | Core routing functionality for multi-route neural network architecture. Defines feature routing mappings and data preparation pipelines for ML models. |
+| **routing/gs_routes.py** | 2025-08-06 | Grid search implementation for testing all possible feature-route combinations in the routing classifier. Generates and evaluates different routing strategies. |
+| **routing/training.py** | 2025-08-06 | Training pipeline for routing-based neural network models. Includes model training, validation, and dummy data generation functions. |
+| **CLAUDE.md** | 2025-08-06 | Project documentation and guidance for Claude Code AI assistant. Contains architecture overview, dependencies, and development notes. |
+| **README.md** | 2025-08-06 | This file - comprehensive project documentation including file descriptions, usage instructions, and technical details. |
 
 ### Major Changes Summary
 - **v0.1.0 (Initial)**: Multi-year NLCD processing, buffer creation, landscape metrics
 - **Recent Updates**: Added DEM feature extraction, routing-based ML architecture, improved error handling and CRS transformations
+- **Latest (August 2025)**: Added HWM depth calculation notebook and target data for machine learning models
 
 ## Input and Output Files
 
@@ -51,6 +53,7 @@ The project combines multiple data sources and analytical approaches:
 |------|------|-------------|-------------|
 | **imp_surface_features.csv** | 127 KB | NLCD_Extract_v0.1.0.py | NLCD-derived landscape metrics for each flood point including area percentages, core area indices, and impervious surface characteristics |
 | **dem_features.csv** | 89 KB | dem_features.ipynb | DEM-derived topographic features including elevation, slope, aspect, and terrain roughness metrics |
+| **HWM_Depth_m.csv** | NEW | Calculate_HWM_Depth_v1.0.ipynb | High water mark depth measurements in meters, serving as the target variable for machine learning flood prediction models |
 
 
 ### Feature Columns
@@ -59,67 +62,58 @@ The project combines multiple data sources and analytical approaches:
 - `ID`: Flood point identifier
 - `peak_date`: Original flood event date  
 - `nlcd_year`: NLCD data year used for analysis
-- `total_area_km2`: Total buffer area in km²
+- `total_area_km2`: Total buffer area in km² (typically 9.1809 km²)
 - `pct_area_1`: % of buffer with low-intensity impervious surface (20-49%)
 - `pct_area_2`: % of buffer with medium-intensity impervious surface (50-79%)
 - `area_km_1`, `area_km_2`: Absolute areas (km²) for each impervious class
-- `cai_1`, `cai_2`: Core Area Index (landscape fragmentation metric)
+- `cai_1`, `cai_2`: Core Area Index (landscape fragmentation metric, higher values indicate less fragmented landscapes)
 
-## Technical Implementation
+#### dem_features.csv
+- `file_id`: Flood point identifier matching ID in other datasets
+- `year`: Year of DEM data used (includes '.tif' extension)
+- `dem_min`: Minimum elevation value (meters) within the analysis area
+- `dem_max`: Maximum elevation value (meters) within the analysis area
+- `dem_mean`: Mean elevation value (meters) within the analysis area
+- `dem_iqr`: Interquartile range of elevation values (meters) - measure of topographic variability
+- `projection`: Coordinate reference system used (EPSG:4326 - WGS84 geographic)
 
-### NLCD Processing Workflow
-1. **Load flood points** from shapefile and extract years from peak_date
-2. **Create 1.5km square buffers** in projected coordinates (EPSG:5070) for accurate metric distances
-3. **Match flood events** to corresponding year's NLCD data (2016-2024)
-4. **Extract raster data** within buffers using spatial masking
-5. **Recode NLCD values** (1→1, 2→2, others→0) and calculate landscape metrics
-6. **Export structured results** to CSV files
+#### HWM_Depth_m.csv
+- `ID`: Flood point identifier matching other datasets
+- `Year`: Year of the flood event (integer format)
+- `HWMdepth_m`: High water mark depth in meters above ground surface, calculated as (flood elevation - ground elevation from DEM)
 
-### Machine Learning Architecture
-- **Multi-route Neural Networks**: Routes different feature types (DEM, Imagery, Rainfall, Soil, Landuse, Vegetation, Impervious Surface) through specialized processing paths
-- **Grid Search Optimization**: Tests all possible feature-route combinations to find optimal routing strategies
-- **PyTorch Implementation**: Uses deep learning frameworks for model training and validation
-
-### Key Technical Features
-- **Memory Efficient**: Windowed reading loads only buffer-intersecting pixels
-- **Multi-temporal Analysis**: Matches flood events to appropriate NLCD year
-- **Accurate Geospatial Processing**: EPSG:5070 projection ensures proper metric calculations
-- **Robust Error Handling**: Graceful handling of missing data and processing failures
-- **Cross-platform Support**: Windows and Linux/Anvil cluster compatibility
 
 ## Dependencies
 
 ### Core Geospatial Libraries
-- `rasterio` - Geospatial raster data I/O and processing
-- `geopandas` - Vector geospatial data handling and operations
-- `pylandstats` - Landscape ecology metrics calculation
-- `shapely` - Geometric operations and spatial analysis
+- `rasterio` - Geospatial raster data I/O and processing, windowed reading, CRS transformations
+- `geopandas` - Vector geospatial data handling, shapefile I/O, geometry operations
+- `pylandstats` - Landscape ecology metrics calculation (Core Area Index, area percentages)
+- `shapely` - Geometric operations, buffer creation, spatial analysis
+- `pathlib` - Cross-platform file path handling (Python 3.4+)
 
 ### Data Science & ML Libraries  
-- `pandas` - Data manipulation and analysis
-- `numpy` - Numerical computations
-- `torch` - PyTorch deep learning framework
-- `matplotlib` - Data visualization and plotting
-- `tqdm` - Progress bar displays
+- `pandas` - Data manipulation, CSV I/O, temporal data parsing
+- `numpy` - Numerical computations, array operations, statistical functions
+- `scipy` - Statistical functions (interquartile range calculation)
+- `torch` - PyTorch deep learning framework for neural networks
+- `torch.nn` - Neural network layers and architectures
+- `torch.optim` - Optimization algorithms for model training
+- `torch.utils.data` - Data loading utilities (DataLoader, TensorDataset)
 
-## Usage Instructions
+### Visualization & Progress Libraries
+- `matplotlib` - Data visualization, plotting, histograms
+- `matplotlib.pyplot` - Plotting interface for visualizations
+- `tqdm` - Progress bar displays for long-running processes
 
-### NLCD Feature Extraction
-```bash
-python NLCD_Extract_v0.1.0.py
-```
+### Standard Python Libraries
+- `os` - File system operations, path manipulation
+- `sys` - System-specific parameters and functions
+- `glob` - Unix-style pathname pattern expansion
+- `json` - JSON data parsing and manipulation
+- `warnings` - Warning control and management
+- `datetime` - Date and time manipulation for temporal data
 
-### DEM Feature Processing
-```bash
-jupyter notebook dem_features.ipynb
-```
-
-### ML Model Training
-```bash
-cd routing/
-python gs_routes.py  # Grid search for optimal routing
-python training.py   # Train routing classifier
-```
 
 ## Notes
 

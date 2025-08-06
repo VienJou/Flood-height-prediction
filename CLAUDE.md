@@ -17,11 +17,13 @@ This is a flood height prediction research project that processes geospatial dat
 ### Jupyter Notebooks
 - **NLCD_Extract_v0.1.0_test.ipynb**: Testing notebook for NLCD extraction workflow
 - **dem_features.ipynb**: Digital elevation model feature extraction
+- **Calculate_HWM_Depth_v1.0.ipynb**: High Water Mark (HWM) depth calculation notebook for generating target variables
 
 ### Data Files
 - **data/imp_surface_features.csv**: Extracted impervious surface features from NLCD analysis
 - **data/dem_features.csv**: Digital elevation model derived features
-- **NLCD_MultiYear_Stats.csv**: Multi-year NLCD statistics output
+- **data/HWM_Depth_m.csv**: High water mark depth measurements in meters (target variable for ML models)
+- **NLCD_MultiYear_Stats.csv**: Multi-year NLCD statistics output (legacy file)
 
 ## Dependencies
 
@@ -32,6 +34,9 @@ The project requires the following Python libraries:
 - `numpy` - For numerical computations
 - `pylandstats` - For landscape metrics calculation
 - `shapely` - For geometric operations
+- `torch` - PyTorch deep learning framework for ML models
+- `matplotlib` - Data visualization and plotting
+- `tqdm` - Progress bar displays
 - `os` - For file system operations
 - `warnings` - For warning management
 
@@ -50,6 +55,8 @@ The project requires the following Python libraries:
 - Robust date parsing and year extraction from flood event data
 - Error handling for missing data and processing failures
 - Progress tracking for large dataset processing
+- High Water Mark depth calculation and target variable generation
+- Multi-route neural network architecture for flood prediction modeling
 
 ## File Paths and Configuration
 
@@ -72,6 +79,15 @@ For interactive analysis and testing:
 ```bash
 jupyter notebook NLCD_Extract_v0.1.0_test.ipynb
 jupyter notebook dem_features.ipynb
+jupyter notebook Calculate_HWM_Depth_v1.0.ipynb
+```
+
+### Machine Learning Training
+For routing-based model training:
+```bash
+cd routing/
+python gs_routes.py  # Grid search for optimal routing
+python training.py   # Train routing classifier
 ```
 
 ### Prerequisites
