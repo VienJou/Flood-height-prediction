@@ -24,6 +24,7 @@ The project consists of three main components:
 | **NLCD_Extract_v0.1.0_test.ipynb** | 2025-08-06 | Jupyter notebook for testing and prototyping the NLCD extraction workflow. Contains experimental code and visualizations for buffer creation and metrics calculation. |
 | **dem_features.ipynb** | 2025-08-06 | Jupyter notebook for extracting digital elevation model (DEM) features around flood points. Processes topographic characteristics and terrain metrics. |
 | **Calculate_HWM_Depth_v1.0.ipynb** | 2025-08-06 | Jupyter notebook for calculating High Water Mark (HWM) depth measurements. Processes flood depth data and generates target variable for machine learning models. |
+| **Sentinel_Features.ipynb** | 2025-08-06 | Jupyter notebook for extracting Sentinel-1 SAR features around flood points. Creates 1.5km square buffers, clips VV and VH polarization bands, and calculates backscatter statistics and ratios. |
 | **routing/routing.py** | 2025-08-06 | Core routing functionality for multi-route neural network architecture. Defines feature routing mappings and data preparation pipelines for ML models. |
 | **routing/gs_routes.py** | 2025-08-06 | Grid search implementation for testing all possible feature-route combinations in the routing classifier. Generates and evaluates different routing strategies. |
 | **routing/training.py** | 2025-08-06 | Training pipeline for routing-based neural network models. Includes model training, validation, and dummy data generation functions. |
@@ -33,7 +34,7 @@ The project consists of three main components:
 ### Major Changes Summary
 - **v0.1.0 (Initial)**: Multi-year NLCD processing, buffer creation, landscape metrics
 - **Recent Updates**: Added DEM feature extraction, routing-based ML architecture, improved error handling and CRS transformations
-- **Latest (August 2025)**: Added HWM depth calculation notebook and target data for machine learning models
+- **Latest (August 2025)**: Added HWM depth calculation notebook, Sentinel-1 SAR feature extraction, precipitation data, and target data for comprehensive multi-sensor machine learning models
 
 ## Input and Output Files
 
@@ -42,9 +43,10 @@ The project consists of three main components:
 #### External Input Files (Not in Repository)
 | File | Size | Used By | Source | Description |
 |------|------|---------|--------|-------------|
-| **filtered_flooding_points_over_one_day*.shp** | N/A | NLCD_Extract_v0.1.0.py, Calculate_HWM_Depth_v1.0.ipynb | USGS | High water mark points with ID, peak_date, elev_ft, and geometry attributes |
+| **filtered_flooding_points_over_one_day*.shp** | N/A | NLCD_Extract_v0.1.0.py, Calculate_HWM_Depth_v1.0.ipynb, Sentinel_Features.ipynb | USGS | High water mark points with ID, peak_date, elev_ft, and geometry attributes |
 | **Annual_NLCD_ImpDsc_{YEAR}_CU_C1V1.tif** | ~4GB each | NLCD_Extract_v0.1.0.py | USGS National Land Cover Database | Annual impervious surface data (2016-2024), 30m resolution |
 | **{ID}_USGS_3DEP_{YEAR}.tif** | Varies | Calculate_HWM_Depth_v1.0.ipynb, dem_features.ipynb | USGS 3DEP | Individual DEM raster files named by flood point ID and year, 10m resolution |
+| **{ID}_S1_*.tif** | Varies | Sentinel_Features.ipynb | Google Earth Engine/ESA | Sentinel-1 SAR imagery for flood points with VV and VH polarizations, processed from GEE |
 | **flooding_dataset_with_precipitation_0801_with_height_above.json** | N/A | dem_features.ipynb | Project metadata | JSON file containing flood point metadata including Sentinel-1 data availability flags |
 
 #### File Path Configurations
@@ -59,7 +61,9 @@ The project supports both Windows and Linux/cluster environments:
 |------|------|-------------|-------------|
 | **imp_surface_features.csv** | 127 KB | NLCD_Extract_v0.1.0.py | NLCD-derived landscape metrics for each flood point including area percentages, core area indices, and impervious surface characteristics |
 | **dem_features.csv** | 89 KB | dem_features.ipynb | DEM-derived topographic features including elevation, slope, aspect, and terrain roughness metrics |
-| **HWM_Depth_m.csv** | NEW | Calculate_HWM_Depth_v1.0.ipynb | High water mark depth measurements in meters, serving as the target variable for machine learning flood prediction models |
+| **HWM_Depth_m.csv** | 2 KB | Calculate_HWM_Depth_v1.0.ipynb | High water mark depth measurements in meters, serving as the target variable for machine learning flood prediction models |
+| **precipitation.csv** | 6 KB | External source | Precipitation data for flood points with ID, S1_Date, and precipitation values |
+| **sentinel1_combined_features.csv** | 192 KB | Sentinel_Features.ipynb | Sentinel-1 SAR backscatter features including VV/VH statistics (min, max, mean, IQR, SD) and VH/VV ratios for flood point buffers |
 
 
 ### Feature Columns
@@ -87,6 +91,26 @@ The project supports both Windows and Linux/cluster environments:
 - `ID`: Flood point identifier matching other datasets
 - `Year`: Year of the flood event (integer format)
 - `HWMdepth_m`: High water mark depth in meters above ground surface, calculated as (flood elevation - ground elevation from DEM)
+
+#### precipitation.csv
+- `ID`: Flood point identifier matching other datasets
+- `S1_Date`: Sentinel-1 acquisition date for the flood event
+- `precipitation`: Precipitation value (units to be confirmed)
+
+#### sentinel1_combined_features.csv
+- `ID`: Flood point identifier matching other datasets
+- `peak_date`: Original flood event date and time
+- `VV_Min`: Minimum VV polarization backscatter value (dB) within the 1.5km buffer
+- `VV_Max`: Maximum VV polarization backscatter value (dB) within the buffer
+- `VV_Mean`: Mean VV polarization backscatter value (dB) within the buffer
+- `VV_IQR`: Interquartile range of VV backscatter values (dB)
+- `VV_SD`: Standard deviation of VV backscatter values (dB)
+- `VH_Min`: Minimum VH polarization backscatter value (dB) within the buffer
+- `VH_Max`: Maximum VH polarization backscatter value (dB) within the buffer
+- `VH_Mean`: Mean VH polarization backscatter value (dB) within the buffer
+- `VH_IQR`: Interquartile range of VH backscatter values (dB)
+- `VH_SD`: Standard deviation of VH backscatter values (dB)
+- `VH_VV_Ratio`: Ratio of VH mean to VV mean backscatter values, useful for surface roughness and flood detection
 
 
 ## Dependencies
