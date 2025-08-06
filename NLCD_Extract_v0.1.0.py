@@ -25,8 +25,8 @@ nlcd_files = {
     2024: "/anvil/projects/x-cis250634/team5/data_0718/Annual_NLCD_ImpDsc_2024_CU_C1V1.tif"
 }
 """
-# Alternative Windows paths (commented out)
-nlcd_files = {
+# Windows paths for impervious surface data
+nlcd_imp_files = {
      2016: r"C:\Users\alekb\Downloads\Annual_NLCD_ImpDsc_2016_CU_C1V1.tif",
      2017: r"C:\Users\alekb\Downloads\Annual_NLCD_ImpDsc_2017_CU_C1V1.tif",
      2018: r"C:\Users\alekb\Downloads\Annual_NLCD_ImpDsc_2018_CU_C1V1.tif",
@@ -37,18 +37,37 @@ nlcd_files = {
      2023: r"C:\Users\alekb\Downloads\Annual_NLCD_ImpDsc_2023_CU_C1V1.tif",
      2024: r"C:\Users\alekb\Downloads\Annual_NLCD_ImpDsc_2024_CU_C1V1.tif"}
 
+# Windows paths for vegetation/land cover data
+nlcd_veg_files = {
+     2016: r"C:\Users\alekb\Downloads\Annual_NLCD_LndCov_2016_CU_C1V1.tif",
+     2017: r"C:\Users\alekb\Downloads\Annual_NLCD_LndCov_2017_CU_C1V1.tif",
+     2018: r"C:\Users\alekb\Downloads\Annual_NLCD_LndCov_2018_CU_C1V1.tif",
+     2019: r"C:\Users\alekb\Downloads\Annual_NLCD_LndCov_2019_CU_C1V1.tif",
+     2020: r"C:\Users\alekb\Downloads\Annual_NLCD_LndCov_2020_CU_C1V1.tif",
+     2021: r"C:\Users\alekb\Downloads\Annual_NLCD_LndCov_2021_CU_C1V1.tif",
+     2022: r"C:\Users\alekb\Downloads\Annual_NLCD_LndCov_2022_CU_C1V1.tif",
+     2023: r"C:\Users\alekb\Downloads\Annual_NLCD_LndCov_2023_CU_C1V1.tif",
+     2024: r"C:\Users\alekb\Downloads\Annual_NLCD_LndCov_2024_CU_C1V1.tif"}
+
 
 # Check which NLCD files exist
 print("Checking NLCD file availability...")
 available_years = []
-for year, filepath in nlcd_files.items():
-    if os.path.exists(filepath):
+for year in nlcd_imp_files.keys():
+    imp_exists = os.path.exists(nlcd_imp_files[year])
+    veg_exists = os.path.exists(nlcd_veg_files[year])
+    
+    if imp_exists and veg_exists:
         available_years.append(year)
-        print(f"✓ Found NLCD file for {year}")
+        print(f"[OK] Found both NLCD files for {year}")
+    elif imp_exists:
+        print(f"[WARN] Found only impervious surface file for {year}")
+    elif veg_exists:
+        print(f"[WARN] Found only vegetation file for {year}")
     else:
-        print(f"✗ Missing NLCD file for {year}")
+        print(f"[MISSING] Missing both NLCD files for {year}")
 
-print(f"\nAvailable years: {available_years}")
+print(f"\nAvailable years (with both files): {available_years}")
 
 # Load flood points
 print("\nLoading flood points...")
@@ -81,6 +100,27 @@ def create_square_buffer(point, distance):
 def recode_nlcd_data(data):
     """Recode NLCD data: 1->1, 2->2, everything else->0"""
     return np.where((data == 1) | (data == 2), data, 0)
+
+def group_vegetation_classes(data):
+    """Group NLCD vegetation classes into parent categories"""
+    # Forest: 41, 42, 43
+    forest = np.isin(data, [41, 42, 43])
+    # Shrubland: 51, 52  
+    shrubland = np.isin(data, [51, 52])
+    # Herbaceous: 71, 72, 73, 74
+    herbaceous = np.isin(data, [71, 72, 73, 74])
+    # Planted/Cultivated: 81, 82
+    planted = np.isin(data, [81, 82])
+    # Wetlands: 90, 95
+    wetlands = np.isin(data, [90, 95])
+    
+    return {
+        'forest': forest,
+        'shrubland': shrubland, 
+        'herbaceous': herbaceous,
+        'planted': planted,
+        'wetlands': wetlands
+    }
 
 # Create 1.5 km square buffers around each flood point
 print(f"\nOriginal CRS: {flood_points.crs}")
@@ -119,7 +159,7 @@ buffer_metrics = []
 print("\nCalculating multi-year landscape metrics...")
 
 # Get reference CRS from first available NLCD file
-reference_nlcd_file = nlcd_files[available_years[0]]
+reference_nlcd_file = nlcd_imp_files[available_years[0]]
 with rasterio.open(reference_nlcd_file) as src:
     raster_crs = src.crs
     raster_transform = src.transform
@@ -148,9 +188,11 @@ for idx, buffer_geom in enumerate(buffered_points_raster_crs.geometry):
                 closest_year = min(available_years, key=lambda x: abs(x - flood_year))
             flood_year = closest_year
 
-        nlcd_file = nlcd_files[flood_year]
+        nlcd_imp_file = nlcd_imp_files[flood_year]
+        nlcd_veg_file = nlcd_veg_files[flood_year]
 
-        with rasterio.open(nlcd_file) as src:
+        # Process impervious surface data
+        with rasterio.open(nlcd_imp_file) as src:
             # Mask the raster data with the buffer geometry
             masked_data, masked_transform = mask(src, [buffer_geom], crop=True, filled=False)
             masked_array = masked_data[0]
@@ -180,7 +222,7 @@ for idx, buffer_geom in enumerate(buffered_points_raster_crs.geometry):
             metrics['area_km_1'] = (class_1_pixels * 30 * 30) / 1000000
             metrics['area_km_2'] = (class_2_pixels * 30 * 30) / 1000000
 
-            # Calculate core area index
+            # Calculate core area index for impervious surface
             try:
                 if class_1_pixels > 0:
                     cai_class_1 = ls.core_area_index(class_val=1, edge_depth=1, percent=True)
@@ -197,6 +239,38 @@ for idx, buffer_geom in enumerate(buffered_points_raster_crs.geometry):
                 print(f"Warning: Could not calculate CAI for ID {original_id}: {e}")
                 metrics['cai_1'] = np.nan
                 metrics['cai_2'] = np.nan
+
+        # Process vegetation data
+        with rasterio.open(nlcd_veg_file) as src:
+            # Mask the vegetation raster data with the buffer geometry
+            veg_masked_data, veg_masked_transform = mask(src, [buffer_geom], crop=True, filled=False)
+            veg_masked_array = veg_masked_data[0]
+
+            # Handle masked values
+            veg_masked_array = np.where(veg_masked_array.mask, -1, veg_masked_array.data)
+            
+            # Group vegetation classes
+            veg_groups = group_vegetation_classes(veg_masked_array)
+            
+            # Calculate vegetation metrics and CAI
+            for veg_type, veg_mask in veg_groups.items():
+                veg_pixels = np.sum(veg_mask)
+                metrics[f'pct_area_{veg_type}'] = (veg_pixels / total_pixels) * 100
+                metrics[f'area_km_{veg_type}'] = (veg_pixels * 30 * 30) / 1000000
+                
+                # Calculate CAI for vegetation groups
+                try:
+                    if veg_pixels > 0:
+                        # Create binary raster for this vegetation type (1 where vegetation type exists, 0 elsewhere)
+                        veg_binary = veg_mask.astype(int)
+                        veg_ls = pls.Landscape(veg_binary, res=(30, 30))
+                        cai_veg = veg_ls.core_area_index(class_val=1, edge_depth=1, percent=True)
+                        metrics[f'cai_{veg_type}'] = cai_veg.iloc[0] if isinstance(cai_veg, pd.Series) else cai_veg
+                    else:
+                        metrics[f'cai_{veg_type}'] = 0
+                except Exception as e:
+                    print(f"Warning: Could not calculate CAI for {veg_type} in ID {original_id}: {e}")
+                    metrics[f'cai_{veg_type}'] = np.nan
 
             buffer_metrics.append(metrics)
 
@@ -216,7 +290,22 @@ for idx, buffer_geom in enumerate(buffered_points_raster_crs.geometry):
             'area_km_1': np.nan,
             'area_km_2': np.nan,
             'cai_1': np.nan,
-            'cai_2': np.nan
+            'cai_2': np.nan,
+            'pct_area_forest': np.nan,
+            'pct_area_shrubland': np.nan,
+            'pct_area_herbaceous': np.nan,
+            'pct_area_planted': np.nan,
+            'pct_area_wetlands': np.nan,
+            'area_km_forest': np.nan,
+            'area_km_shrubland': np.nan,
+            'area_km_herbaceous': np.nan,
+            'area_km_planted': np.nan,
+            'area_km_wetlands': np.nan,
+            'cai_forest': np.nan,
+            'cai_shrubland': np.nan,
+            'cai_herbaceous': np.nan,
+            'cai_planted': np.nan,
+            'cai_wetlands': np.nan
         })
 
 # Create final DataFrame and save results
@@ -227,6 +316,6 @@ print("\nFirst few rows:")
 print(multi_year_metrics_df.head())
 
 # Save results
-output_file = r"C:\Users\alekb\OneDrive - UCB-O365\Research\Flood-height-prediction\data\imp_surface_features.csv"
+output_file = r"C:\Users\alekb\OneDrive - UCB-O365\Research\Flood-height-prediction\data\combined_nlcd_features.csv"
 multi_year_metrics_df.to_csv(output_file, index=False)
-print(f"Multi-year results saved to {output_file}")
+print(f"Multi-year results with vegetation features saved to {output_file}")
