@@ -23,7 +23,7 @@ The project consists of three main components:
 | **NLCD_Extract_v0.1.0.py** | 2025-08-06 | Main script for extracting NLCD impervious surface features around flood points. Creates 1.5km square buffers, processes multi-year data (2016-2024), calculates landscape metrics including area percentages and core area indices. |
 | **NLCD_Extract_v0.1.0_test.ipynb** | 2025-08-06 | Jupyter notebook for testing and prototyping the NLCD extraction workflow. Contains experimental code and visualizations for buffer creation and metrics calculation. |
 | **dem_features.ipynb** | 2025-08-06 | Jupyter notebook for extracting digital elevation model (DEM) features around flood points. Processes topographic characteristics and terrain metrics. |
-| **Calculate_HWM_Depth_v1.0.ipynb** | 2025-08-06 | New Jupyter notebook for calculating High Water Mark (HWM) depth measurements. Processes flood depth data and generates target variable for machine learning models. |
+| **Calculate_HWM_Depth_v1.0.ipynb** | 2025-08-06 | Jupyter notebook for calculating High Water Mark (HWM) depth measurements. Processes flood depth data and generates target variable for machine learning models. |
 | **routing/routing.py** | 2025-08-06 | Core routing functionality for multi-route neural network architecture. Defines feature routing mappings and data preparation pipelines for ML models. |
 | **routing/gs_routes.py** | 2025-08-06 | Grid search implementation for testing all possible feature-route combinations in the routing classifier. Generates and evaluates different routing strategies. |
 | **routing/training.py** | 2025-08-06 | Training pipeline for routing-based neural network models. Includes model training, validation, and dummy data generation functions. |
