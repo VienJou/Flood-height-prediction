@@ -4,10 +4,11 @@ This repository contains code and data for predicting flood heights using machin
 
 ## Project Overview
 
-The project consists of three main components:
-1. **Feature Extraction**: Extracts landscape and topographic features around flood locations
+The project consists of four main components:
+1. **Feature Extraction**: Extracts landscape, topographic, SAR, precipitation, and soil moisture features around flood locations
 2. **Target Generation**: Calculates flood depths from elevation measurements  
-3. **Machine Learning**: Uses data fusion and machine learning to predict flood depths
+3. **Data Processing**: Handles temporal alignment, coordinate transformations, and multi-sensor data fusion
+4. **Machine Learning**: Implements Random Forest and neural network models to predict flood depths using comprehensive multi-sensor datasets
 
 ## Repository Structure
 
@@ -28,13 +29,15 @@ The project consists of three main components:
 | **routing/routing.py** | 2025-08-06 | Core routing functionality for multi-route neural network architecture. Defines feature routing mappings and data preparation pipelines for ML models. |
 | **routing/gs_routes.py** | 2025-08-06 | Grid search implementation for testing all possible feature-route combinations in the routing classifier. Generates and evaluates different routing strategies. |
 | **routing/training.py** | 2025-08-06 | Training pipeline for routing-based neural network models. Includes model training, validation, and dummy data generation functions. |
+| **RF_Train_v0.1.0.ipynb** | 2025-08-06 | Random Forest training notebook for flood depth prediction. Implements comprehensive ML pipeline with hyperparameter tuning, cross-validation, feature importance analysis, and model evaluation using all extracted features. |
+| **data_process.ipynb** | 2025-08-06 | Data processing notebook for extracting precipitation and soil moisture features from CHIRPS and SMAP datasets. Handles reprojection, temporal alignment with flood events, and spatial sampling at flood point locations. |
 | **CLAUDE.md** | 2025-08-06 | Project documentation and guidance for Claude Code AI assistant. Contains architecture overview, dependencies, and development notes. |
 | **README.md** | 2025-08-06 | This file - comprehensive project documentation including file descriptions, usage instructions, and technical details. |
 
 ### Major Changes Summary
 - **v0.1.0 (Initial)**: Multi-year NLCD processing, buffer creation, landscape metrics
 - **Recent Updates**: Added DEM feature extraction, routing-based ML architecture, improved error handling and CRS transformations
-- **Latest (August 2025)**: Added HWM depth calculation notebook, Sentinel-1 SAR feature extraction, precipitation data, and target data for comprehensive multi-sensor machine learning models
+- **Latest (August 2025)**: Added HWM depth calculation notebook, Sentinel-1 SAR feature extraction, precipitation/soil moisture processing, Random Forest ML pipeline, and comprehensive multi-sensor machine learning models
 
 ## Input and Output Files
 
@@ -47,7 +50,9 @@ The project consists of three main components:
 | **Annual_NLCD_ImpDsc_{YEAR}_CU_C1V1.tif** | ~4GB each | NLCD_Extract_v0.1.0.py | USGS National Land Cover Database | Annual impervious surface data (2016-2024), 30m resolution |
 | **{ID}_USGS_3DEP_{YEAR}.tif** | Varies | Calculate_HWM_Depth_v1.0.ipynb, dem_features.ipynb | USGS 3DEP | Individual DEM raster files named by flood point ID and year, 10m resolution |
 | **{ID}_S1_*.tif** | Varies | Sentinel_Features.ipynb | Google Earth Engine/ESA | Sentinel-1 SAR imagery for flood points with VV and VH polarizations, processed from GEE |
-| **flooding_dataset_with_precipitation_0801_with_height_above.json** | N/A | dem_features.ipynb | Project metadata | JSON file containing flood point metadata including Sentinel-1 data availability flags |
+| **CHIRPS_1day_ahead/*.tif** | Varies | data_process.ipynb | CHIRPS/UCSB | Climate Hazards Group InfraRed Precipitation with Station data - 1-day ahead precipitation forecasts, 0.05° resolution |
+| **Flooding_SMAP9KM_{TIME}/*.tif** | Varies | data_process.ipynb | NASA SMAP | Soil Moisture Active Passive (SMAP) 9km soil moisture data at various time intervals before flood events (3hr, 6hr, 9hr, 12hr) |
+| **flooding_dataset_with_precipitation_0801_with_height_above.json** | N/A | dem_features.ipynb, data_process.ipynb | Project metadata | JSON file containing flood point metadata including Sentinel-1 data availability flags and temporal alignment information |
 
 #### File Path Configurations
 The project supports both Windows and Linux/cluster environments:
@@ -126,6 +131,10 @@ The project supports both Windows and Linux/cluster environments:
 - `pandas` - Data manipulation, CSV I/O, temporal data parsing
 - `numpy` - Numerical computations, array operations, statistical functions
 - `scipy` - Statistical functions (interquartile range calculation)
+- `scikit-learn` - Machine learning library with RandomForestRegressor, train_test_split, RandomizedSearchCV, cross-validation, and regression metrics
+- `sklearn.model_selection` - Model selection tools for hyperparameter tuning and data splitting
+- `sklearn.ensemble` - Ensemble methods including Random Forest algorithms
+- `sklearn.metrics` - Performance evaluation metrics (MSE, MAE, R², etc.)
 - `torch` - PyTorch deep learning framework for neural networks
 - `torch.nn` - Neural network layers and architectures
 - `torch.optim` - Optimization algorithms for model training
@@ -145,6 +154,28 @@ The project supports both Windows and Linux/cluster environments:
 - `datetime` - Date and time manipulation for temporal data
 
 
+## Machine Learning Pipeline
+
+### Random Forest Implementation (RF_Train_v0.1.0.ipynb)
+The Random Forest model serves as the primary machine learning approach for flood depth prediction:
+
+#### Model Features:
+- **Multi-sensor fusion**: Combines NLCD landscape metrics, DEM topographic features, Sentinel-1 SAR data, precipitation, and soil moisture
+- **Robust hyperparameter tuning**: Uses RandomizedSearchCV with 5-fold cross-validation and 100 iterations
+- **Comprehensive evaluation**: Implements proper train/validation/test splits (70%/15%/15%) with z-score standardization
+- **Feature importance analysis**: Identifies most predictive features and provides cumulative importance insights
+- **Overfitting detection**: Monitors performance gaps between training, validation, and test sets
+
+#### Key Metrics:
+- **Performance measures**: MSE, RMSE, MAE, R² score across all data splits
+- **Visualizations**: Actual vs predicted plots, residual analysis, feature importance rankings
+- **Model interpretability**: Feature selection guidance (80% and 90% importance thresholds)
+
+#### Output Analysis:
+- Identifies optimal number of features needed for effective prediction
+- Provides comprehensive model diagnostics and performance assessment
+- Generates publication-ready visualizations for model evaluation
+
 ## Notes
 
 ### Performance Considerations
@@ -154,6 +185,8 @@ The project supports both Windows and Linux/cluster environments:
 - **Missing Years**: Script automatically uses closest available NLCD year when exact match unavailable
 - **Coordinate Systems**: Automatic handling of CRS transformations between geographic and projected coordinates
 - **Core Area Index**: Higher values indicate less fragmented landscapes (better habitat connectivity)
+- **Multi-sensor Integration**: Temporal alignment ensures precipitation, soil moisture, and SAR data correspond to flood event timing
+- **Spatial Sampling**: Point-based extraction from raster datasets with proper reprojection and coordinate handling
 
 ### Development Notes
 - **File Paths**: Currently configured for Windows environment with alternative Linux paths commented out
