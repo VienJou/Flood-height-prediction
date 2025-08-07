@@ -1,0 +1,61 @@
+feature,importance,category
+dewpoint_c,0.040425591,Other Weather
+latitude,0.038674979,Geography
+feelslike_c,0.036595659,Other Weather
+pct_area_wetlands,0.029670035133303307,Land Cover
+heatindex_c,0.029448407482406583,Other Weather
+VH_Mean,0.027416391212694853,Sentinel
+area_km_wetlands,0.026937581060254033,Land Cover
+VH_VV_Ratio,0.026781351,Sentinel
+windchill_c,0.026600513,Other Weather
+longitude,0.025239648549053504,Geography
+gust_kph,0.024768577,Wind
+dem_mean,0.024018100301649213,DEM
+pressure_mb,0.023289477306523095,Other Weather
+year,0.023264504,Time
+VH_SD,0.023171653109976424,Sentinel
+area_km_1,0.021424711119469413,Land Cover
+dem_iqr,0.021413856185241362,DEM
+dem_max,0.021224657970212533,DEM
+VV_SD,0.021206255926699374,Sentinel
+pct_area_1,0.021069682048653084,Land Cover
+VV_Mean,0.020516477195262086,Sentinel
+VH_IQR,0.020499255,Sentinel
+cai_wetlands,0.019810724942369292,Land Cover
+area_km_2,0.019458437,Land Cover
+pct_area_2,0.019028847,Land Cover
+dem_min,0.017891369433620453,DEM
+pct_area_shrubland,0.017539246,Land Cover
+VV_IQR,0.017444473234216218,Sentinel
+maxwind_kph_day,0.016859441567586755,Wind
+precip_mm,0.016709608,Rain
+VH_Min,0.016691732802631573,Sentinel
+pct_area_forest,0.016601774,Land Cover
+area_km_shrubland,0.016228199,Land Cover
+VV_Max,0.016044098,Sentinel
+area_km_forest,0.014728384716222717,Land Cover
+soil_moisture,0.014700141191223473,Soil Moisture
+pct_area_herbaceous,0.014439244088746923,Land Cover
+precipitation,0.014108251,Rain
+area_km_herbaceous,0.013329144,Land Cover
+area_km_planted,0.013165008061438662,Land Cover
+hour_sin,0.013106688447948498,Time
+VV_Min,0.013046288907488926,Sentinel
+pct_area_planted,0.012659486413898894,Land Cover
+wind_degree,0.011986624775013915,Wind
+cai_1,0.011199878188928338,Land Cover
+wind_kph,0.011114776,Wind
+cai_planted,0.009110685,Land Cover
+cai_forest,0.00877374,Land Cover
+cai_herbaceous,0.008149686,Land Cover
+humidity,0.007647252,Other Weather
+day_sin,0.006672974,Time
+VH_Max,0.00527307,Sentinel
+cai_2,0.004241876,Land Cover
+vis_km,0.003750721,Other Weather
+cai_shrubland,0.002430383,Land Cover
+month_sin,0.001359391,Time
+chance_of_rain,0.001040991,Other Weather
+uv,0,Other Weather
+chance_of_snow,0,Other Weather
+total_area_km2,0,Land Cover
