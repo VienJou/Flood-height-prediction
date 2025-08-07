@@ -1,10 +1,20 @@
 
+import os, warnings
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split, RandomizedSearchCV, cross_val_score
 from sklearn.ensemble import RandomForestRegressor
 from sklearn import metrics
+
+from sklearn.impute import KNNImputer
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import AgglomerativeClustering
+from sklearn.metrics import silhouette_score
+
+import umap
+
 
 RANDOM_STATE=54
 
@@ -138,3 +148,75 @@ def plot_cumulative_importances(importance_df):
     plt.tight_layout()
     plt.show()
     return 
+
+
+
+# utility functions
+def merge_features(data_dir, file_names):
+    # Read and merge all files on 'ID' with custom suffixes
+    merged_df = pd.read_csv(os.path.join(data_dir, file_names[0]))
+
+    if 'file_id' in merged_df.columns:
+        merged_df = merged_df.rename(columns={'file_id': 'ID'})
+    unnamed_cols = [col for col in merged_df.columns if col.startswith('Unnamed')]
+    merged_df = merged_df.drop(columns=unnamed_cols)
+
+    unique_columns = ['ID', 'peak_date', 'S1_Date']
+
+    for i, file in enumerate(file_names[1:], 1):
+        df = pd.read_csv(os.path.join(data_dir, file))
+        unnamed_cols = [col for col in df.columns if col.startswith('Unnamed')]
+        df = df.drop(columns=unnamed_cols)
+        cols_to_keep = ['ID'] + [col for col in df.columns
+                                if col not in merged_df.columns or col not in unique_columns]
+        df_filtered = df[cols_to_keep]
+        merged_df = pd.merge(merged_df, df_filtered, on='ID')
+    combined_features = merged_df.drop(columns={'year','projection', 'nlcd_year'}, errors='ignore')
+    return combined_features
+
+def datetime_cyclical_transform(combined_features):
+    # Convert to datetime and extract temporal features
+    combined_features['peak_date'] = pd.to_datetime(combined_features['peak_date'], format='%m/%d/%Y %I:%M:%S %p')
+    # Set ID as index to preserve it
+    combined_features = combined_features.set_index('ID')
+
+    # Extract and encode temporal features in one go
+    temporal_features = {
+        'month': (combined_features['peak_date'].dt.month, 12),
+        'day': (combined_features['peak_date'].dt.day, 31),
+        'hour': (combined_features['peak_date'].dt.hour, 24)
+    }
+    # Create cyclical features and add year
+    combined_features['year'] = combined_features['peak_date'].dt.year
+    for feature, (values, period) in temporal_features.items():
+        combined_features[f'{feature}_sin'] = np.sin(2 * np.pi * values / period)
+
+    combined_features = combined_features.drop(columns=['peak_date', 'S1_Date']).select_dtypes(exclude=['datetime64'])
+    return combined_features
+
+def input_missing_values(combined_features):
+    imputer = KNNImputer(n_neighbors=3)
+    df_imputed_array = imputer.fit_transform(combined_features)
+
+    # Convert back to DataFrame to preserve column names
+    df_imputed = pd.DataFrame(df_imputed_array,
+                            columns=combined_features.columns,
+                            index=combined_features.index)
+    df_imputed['year'] = df_imputed['year'].astype('Int64')
+
+    return df_imputed
+
+
+def find_id_like_columns(df: pd.DataFrame) -> list[str]:
+    id_like = []
+    for c in df.columns:
+        cl = c.lower()
+        if (
+            cl in {"id", "ids", "index", "record_id", "uid", "gid"}
+            or cl.startswith(("id_", "idx"))
+            or cl.endswith("_id")
+            or cl == "unnamed: 0"
+            or cl == "height_above"
+        ):
+            id_like.append(c)
+    return id_like
