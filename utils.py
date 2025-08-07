@@ -1,3 +1,13 @@
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split, RandomizedSearchCV, cross_val_score
+from sklearn.ensemble import RandomForestRegressor
+from sklearn import metrics
+
+RANDOM_STATE=54
+
 def split_dataset(X, y, test_size=0.3, random_state=RANDOM_STATE):
     # First split: 70% train, 30% temp (which will be split into 15% val + 15% test)
     X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=test_size, random_state=random_state)
@@ -74,7 +84,7 @@ def feature_importance_analysis(best_rf, features_df):
     feature_importance = best_rf.feature_importances_
 
     # Get feature names from the processed dataframe (after datetime conversion and numeric selection)
-    processed_features_df = df.drop(['height_above'], axis=1).select_dtypes(include=[np.number])
+    processed_features_df = features_df.drop(['height_above'], axis=1).select_dtypes(include=[np.number])
     feature_names = processed_features_df.columns.tolist()
 
     # Ensure lengths match - if not, create generic names
