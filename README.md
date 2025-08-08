@@ -16,34 +16,39 @@ The project is a sophisticated flood height prediction system that integrates mu
 
 ### Folders
 - **`data/`** - Contains processed feature datasets and analysis outputs
-- **`routing/`** - Machine learning routing algorithms and training pipelines
-- **`.idea/`** - IDE configuration files (IntelliJ/PyCharm)
+- **`routing/`** - Machine learning routing algorithms and training pipelines  
+- **`notebooks/`** - Jupyter notebooks for data processing and feature extraction
+- **`figures/`** - Output visualizations and clustering analysis results
+- **`Mapping/`** - GIS project files and geospatial data
 
 ## Code Files Overview
 
 | File | Last Updated | Description |
 |------|-------------|-------------|
-| **NLCD_Extract_v0.1.0.py** | 2025-08-06 | **ENHANCED**: Main script for extracting comprehensive NLCD features including both impervious surface AND vegetation analysis. Creates 1.5km square buffers, processes multi-year data (2016-2024), calculates landscape metrics for 5 vegetation categories (forest, shrubland, herbaceous, planted, wetlands), and computes Core Area Index for all land cover types. Outputs 25 comprehensive features. |
-| **Data_Joining.ipynb** | 2025-08-06 | **NEW**: Critical data pipeline component that merges all feature datasets with robust KNN imputation (k=3). Handles missing data while preserving column names, creates temporal features, and outputs final combined dataset with 1147 samples and 60+ features. |
-| **soil_moisture_data_process.py** | 2025-08-06 | **NEW**: Extracts multi-temporal soil moisture and precipitation data from SMAP and CHIRPS datasets. Processes soil moisture at multiple time intervals (3hr, 6hr, 9hr, 12hr before flood events). |
-| **NLCD_Extract_v0.1.0_test.ipynb** | 2025-08-06 | Jupyter notebook for testing and prototyping the NLCD extraction workflow. Contains experimental code and visualizations for buffer creation and metrics calculation. |
-| **dem_features.ipynb** | 2025-08-06 | Jupyter notebook for extracting digital elevation model (DEM) features around flood points. Processes topographic characteristics and terrain metrics. |
-| **Calculate_HWM_Depth_v1.0.ipynb** | 2025-08-06 | Jupyter notebook for calculating High Water Mark (HWM) depth measurements. Processes flood depth data and generates target variable for machine learning models. |
-| **Sentinel_Features.ipynb** | 2025-08-06 | Jupyter notebook for extracting Sentinel-1 SAR features around flood points. Creates 1.5km square buffers, clips VV and VH polarization bands, and calculates backscatter statistics and ratios. |
-| **routing/routing.py** | 2025-08-06 | Core routing functionality for multi-route neural network architecture. Defines feature routing mappings and data preparation pipelines for ML models. |
-| **routing/gs_routes.py** | 2025-08-06 | Grid search implementation for testing all possible feature-route combinations in the routing classifier. Generates and evaluates different routing strategies. |
-| **routing/training.py** | 2025-08-06 | Training pipeline for routing-based neural network models. Includes model training, validation, and dummy data generation functions. |
-| **RF_Train_v0.1.0.ipynb** | 2025-08-06 | Random Forest training notebook for flood depth prediction. Implements comprehensive ML pipeline with hyperparameter tuning, cross-validation, feature importance analysis, and model evaluation using all extracted features. |
-| **data_process.ipynb** | 2025-08-06 | Data processing notebook for extracting precipitation and soil moisture features from CHIRPS and SMAP datasets. Handles reprojection, temporal alignment with flood events, and spatial sampling at flood point locations. |
-| **CLAUDE.md** | 2025-08-06 | Project documentation and guidance for Claude Code AI assistant. Contains architecture overview, dependencies, and development notes. |
-| **README.md** | 2025-08-06 | This file - comprehensive project documentation including file descriptions, usage instructions, and technical details. |
+| **notebooks/NLCD_Extract_v0.1.0.py** | 2025-08-08 | **ENHANCED**: Main script for extracting comprehensive NLCD features including both impervious surface AND vegetation analysis. Creates 1.5km square buffers, processes multi-year data (2016-2024), calculates landscape metrics for 5 vegetation categories (forest, shrubland, herbaceous, planted, wetlands), and computes Core Area Index for all land cover types. Outputs 25 comprehensive features. |
+| **data_exploration.ipynb** | 2025-08-08 | **NEW**: Renamed from Data_Joining.ipynb. Critical data pipeline component that merges all feature datasets with robust KNN imputation (k=3), performs UMAP dimensionality reduction and clustering analysis. Includes exploratory data analysis with comprehensive visualizations and outputs final combined dataset with 1147 samples and 60+ features. |
+| **modelling.ipynb** | 2025-08-08 | **NEW**: Renamed from RF_Train_v0.1.0.ipynb. Production-ready Random Forest training pipeline for flood depth prediction with comprehensive hyperparameter tuning, cross-validation, feature importance analysis, residual analysis, and model diagnostics. Includes overfitting detection and extensive performance metrics. |
+| **utils.py** | 2025-08-08 | **NEW**: Comprehensive utility functions for data processing, modeling, and visualization. Includes functions for dataset merging, cyclical datetime transformation, missing value imputation, train/test splitting, z-score normalization, regression metrics calculation, plotting utilities, and feature importance analysis. |
+| **notebooks/soil_moisture_data_process.py** | 2025-08-08 | Extracts multi-temporal soil moisture and precipitation data from SMAP and CHIRPS datasets. Processes soil moisture at multiple time intervals (3hr, 6hr, 9hr, 12hr before flood events). |
+| **notebooks/NLCD_Extract_v0.1.0_test.ipynb** | 2025-08-08 | Jupyter notebook for testing and prototyping the NLCD extraction workflow. Contains experimental code and visualizations for buffer creation and metrics calculation. |
+| **notebooks/dem_features.ipynb** | 2025-08-08 | Jupyter notebook for extracting digital elevation model (DEM) features around flood points. Processes topographic characteristics and terrain metrics. |
+| **notebooks/Calculate_HWM_Depth_v1.0.ipynb** | 2025-08-08 | Jupyter notebook for calculating High Water Mark (HWM) depth measurements. Processes flood depth data and generates target variable for machine learning models. |
+| **notebooks/Sentinel_Features.ipynb** | 2025-08-08 | Jupyter notebook for extracting Sentinel-1 SAR features around flood points. Creates 1.5km square buffers, clips VV and VH polarization bands, and calculates backscatter statistics and ratios. |
+| **notebooks/UMAP_Clustering_Inputs.ipynb** | 2025-08-08 | **NEW**: Specialized notebook for UMAP dimensionality reduction and clustering analysis of input features. Generates silhouette analysis, cluster visualizations, and outputs clustering results to figures/Input_Clustering_Results/. |
+| **routing/routing.py** | 2025-08-08 | Core routing functionality for multi-route neural network architecture. Defines feature routing mappings and data preparation pipelines for ML models. |
+| **routing/gs_routes.py** | 2025-08-08 | Grid search implementation for testing all possible feature-route combinations in the routing classifier. Generates and evaluates different routing strategies. |
+| **routing/training.py** | 2025-08-08 | Training pipeline for routing-based neural network models. Includes model training, validation, and dummy data generation functions. |
+| **notebooks/data_process.ipynb** | 2025-08-08 | Data processing notebook for extracting precipitation and soil moisture features from CHIRPS and SMAP datasets. Handles reprojection, temporal alignment with flood events, and spatial sampling at flood point locations. |
+| **CLAUDE.md** | 2025-08-08 | Project documentation and guidance for Claude Code AI assistant. Contains architecture overview, dependencies, and development notes. |
+| **README.md** | 2025-08-08 | This file - comprehensive project documentation including file descriptions, usage instructions, and technical details. |
 
 ### Major Changes Summary
 - **v0.1.0 (Initial)**: Multi-year NLCD processing, buffer creation, landscape metrics
 - **v0.2.0 (Enhanced Features)**: Added comprehensive vegetation analysis with 5 parent classes, Core Area Index calculations for all land cover types, expanded from 9 to 25 NLCD features
 - **v0.3.0 (Data Pipeline)**: Implemented robust data joining pipeline with KNN imputation, column name preservation, temporal feature engineering, and multi-dataset fusion
 - **v0.4.0 (ML Pipeline)**: Added multi-temporal soil moisture processing, weather data integration, Random Forest with hyperparameter tuning, and comprehensive model diagnostics
-- **Latest (August 2025)**: Complete end-to-end pipeline with 1147 samples, 60+ features, advanced imputation, residual analysis, and production-ready ML models
+- **v0.5.0 (August 2025 - Code Organization)**: Major code restructuring with notebooks moved to notebooks/ directory, file renaming for clarity (data_exploration.ipynb, modelling.ipynb), creation of comprehensive utils.py module, addition of UMAP clustering analysis, and enhanced visualization capabilities
+- **Latest (August 2025)**: Complete end-to-end pipeline with 1147 samples, 60+ features, advanced imputation, residual analysis, clustering analysis, and production-ready ML models with comprehensive utilities
 
 ## Input and Output Files
 
@@ -72,7 +77,7 @@ The project supports both Windows and Linux/cluster environments:
 | File | Size | Generated By | Description |
 |------|------|-------------|-------------|
 | **combined_nlcd_features.csv** | 1.2 MB | NLCD_Extract_v0.1.0.py | **ENHANCED**: Comprehensive NLCD features including impervious surface AND vegetation analysis (25 features total) with Core Area Index calculations for all land cover types |
-| **combined_features.csv** | 1.5 MB | Data_Joining.ipynb | **MAIN DATASET**: Final merged dataset with KNN imputation, 1147 samples, 60+ features including all spatial, temporal, and environmental variables |
+| **combined_features.csv** | 1.5 MB | data_exploration.ipynb | **MAIN DATASET**: Final merged dataset with KNN imputation, 1147 samples, 60+ features including all spatial, temporal, and environmental variables |
 | **imp_surface_features.csv** | 127 KB | NLCD_Extract_v0.1.0.py | **LEGACY**: Original NLCD impervious surface metrics (replaced by combined_nlcd_features.csv) |
 | **dem_features.csv** | 89 KB | dem_features.ipynb | DEM-derived topographic features including elevation statistics and terrain metrics at 10m resolution |
 | **dem_1m_features.csv** | 89 KB | dem_features.ipynb | **NEW**: High-resolution DEM features at 1m resolution for detailed topographic analysis |
@@ -83,8 +88,19 @@ The project supports both Windows and Linux/cluster environments:
 | **Coordinates.csv** | 89 KB | dem_features.ipynb | **NEW**: Geographic coordinates for all flood points with CRS information |
 | **precipitation.csv** | 6 KB | External source | CHIRPS precipitation data with 1-day ahead forecasts |
 | **sentinel1_combined_features.csv** | 192 KB | Sentinel_Features.ipynb | Sentinel-1 SAR backscatter features (VV/VH statistics and ratios) |
-| **rf_feature_importance.csv** | 5 KB | RF_Train_v0.1.0.ipynb | **NEW**: Random Forest feature importance rankings for model interpretability |
-| **rf_residuals.csv** | 125 KB | RF_Train_v0.1.0.ipynb | **NEW**: Comprehensive residual analysis with point IDs for error diagnosis |
+| **rf_feature_importance.csv** | 5 KB | modelling.ipynb | **NEW**: Random Forest feature importance rankings for model interpretability |
+| **rf_residuals.csv** | 125 KB | modelling.ipynb | **NEW**: Comprehensive residual analysis with point IDs for error diagnosis |
+| **rf_feature_importance_wcat.csv** | 5 KB | modelling.ipynb | **NEW**: Feature importance categorized by data modality (Land Cover, Weather, Sentinel, DEM, etc.) |
+| **rf_residuals.xlsx** | 125 KB | modelling.ipynb | **NEW**: Excel version of comprehensive residual analysis for easy viewing and filtering |
+
+#### `figures/` Directory
+| File | Size | Generated By | Description |
+|------|------|-------------|-------------|
+| **Input_Clustering_Results/silhouette_scores.csv** | 1 KB | data_exploration.ipynb | Silhouette scores for clustering analysis (k=2 to k=10) |
+| **Input_Clustering_Results/silhouette_scores.png** | 50 KB | data_exploration.ipynb | Silhouette score visualization showing optimal cluster count |
+| **Input_Clustering_Results/umap_k{2-10}.png** | 200 KB each | data_exploration.ipynb | UMAP scatter plots colored by cluster assignments for each k value |
+| **Input_Clustering_Results/umap_embedding_and_labels.csv** | 150 KB | data_exploration.ipynb | UMAP 2D embeddings with cluster labels for all k values and original IDs |
+| **3DVIS_1.jpg, 3DVIS_2.jpg, 3DVIS_3.jpg** | Various | Mapping analysis | 3D visualization exports from GIS analysis
 
 
 ### Feature Columns
@@ -162,10 +178,13 @@ The project supports both Windows and Linux/cluster environments:
 - `numpy` - Numerical computations, array operations, statistical functions
 - `scipy` - Statistical functions (interquartile range calculation)
 - `scikit-learn` - **ENHANCED**: Machine learning library with RandomForestRegressor, train_test_split, RandomizedSearchCV, cross-validation, and regression metrics
-- `sklearn.impute` - **NEW**: Missing data imputation (KNNImputer for robust data preprocessing)
+- `sklearn.impute` - **NEW**: Missing data imputation (KNNImputer and SimpleImputer for robust data preprocessing)
 - `sklearn.model_selection` - Model selection tools for hyperparameter tuning and data splitting
 - `sklearn.ensemble` - Ensemble methods including Random Forest algorithms
-- `sklearn.metrics` - Performance evaluation metrics (MSE, MAE, R², etc.)
+- `sklearn.metrics` - Performance evaluation metrics (MSE, MAE, R², silhouette_score, etc.)
+- `sklearn.preprocessing` - **NEW**: Data preprocessing utilities (StandardScaler for feature normalization)
+- `sklearn.cluster` - **NEW**: Clustering algorithms (AgglomerativeClustering for hierarchical clustering)
+- `umap` - **NEW**: Uniform Manifold Approximation and Projection for dimensionality reduction and visualization
 - `torch` - PyTorch deep learning framework for neural networks
 - `torch.nn` - Neural network layers and architectures
 - `torch.optim` - Optimization algorithms for model training
@@ -189,10 +208,11 @@ The project supports both Windows and Linux/cluster environments:
 
 ### Data Processing Pipeline
 1. **Enhanced Feature Extraction**: NLCD vegetation analysis (25 features), multi-resolution DEM processing, SAR analysis, multi-temporal soil moisture, comprehensive weather data
-2. **Robust Data Integration**: KNN imputation with column name preservation, temporal feature engineering, multi-dataset fusion in Data_Joining.ipynb
-3. **Quality Control**: Missing data handling, coordinate system transformations, temporal alignment across all datasets
+2. **Robust Data Integration**: KNN imputation with column name preservation, temporal feature engineering, multi-dataset fusion in data_exploration.ipynb
+3. **Exploratory Data Analysis**: UMAP dimensionality reduction, clustering analysis, and comprehensive visualizations
+4. **Quality Control**: Missing data handling, coordinate system transformations, temporal alignment across all datasets
 
-### Random Forest Implementation (RF_Train_v0.1.0.ipynb)
+### Random Forest Implementation (modelling.ipynb)
 **Production-ready ML pipeline** with comprehensive flood depth prediction capabilities:
 
 #### Enhanced Model Features:
@@ -213,6 +233,24 @@ The project supports both Windows and Linux/cluster environments:
 - **Extensive hyperparameter search**: Grid search across all feature-route combinations
 - **Publication-ready outputs**: Feature importance rankings, residual analysis, model performance visualizations
 - **Reproducible results**: Comprehensive logging, version control, and standardized evaluation metrics
+
+### Clustering and Dimensionality Reduction (data_exploration.ipynb)
+**Advanced exploratory data analysis** with unsupervised learning techniques:
+
+#### UMAP Implementation:
+- **Dimensionality Reduction**: Reduces 60+ features to 2D embeddings for visualization using UMAP (Uniform Manifold Approximation and Projection)
+- **Parameter Configuration**: Uses n_neighbors=15, min_dist=0.1, euclidean distance metric for optimal flood data representation
+- **Preprocessing**: Includes median imputation, standard scaling, and automatic removal of non-numeric and all-NaN columns
+
+#### Hierarchical Clustering:
+- **Agglomerative Clustering**: Tests cluster counts from k=2 to k=10 using Ward linkage on UMAP embeddings
+- **Silhouette Analysis**: Comprehensive evaluation of cluster quality with silhouette scores for optimal k selection
+- **Visualization Suite**: Generates scatter plots for each k value with color-coded cluster assignments
+
+#### Outputs and Analysis:
+- **Comprehensive Results**: Saves silhouette scores, UMAP embeddings, cluster labels, and visualizations to figures/Input_Clustering_Results/
+- **Data Structure Discovery**: Identifies natural groupings in flood event characteristics for better understanding of data heterogeneity
+- **Feature Space Exploration**: Provides insights into the multivariate relationships between environmental, topographic, and weather features
 
 ## Notes
 
