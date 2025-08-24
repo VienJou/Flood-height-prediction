@@ -41,6 +41,7 @@ The project is a sophisticated flood height prediction system that integrates mu
 | **notebooks/data_process.ipynb** | 2025-08-08 | Data processing notebook for extracting precipitation and soil moisture features from CHIRPS and SMAP datasets. Handles reprojection, temporal alignment with flood events, and spatial sampling at flood point locations. |
 | **CLAUDE.md** | 2025-08-08 | Project documentation and guidance for Claude Code AI assistant. Contains architecture overview, dependencies, and development notes. |
 | **README.md** | 2025-08-08 | This file - comprehensive project documentation including file descriptions, usage instructions, and technical details. |
+| **requirements.txt** | 2025-08-23 | This environment is set up for geospatial analysis, machine learning (classical + deep learning), statistical modeling, and visualization.
 
 ### Major Changes Summary
 - **v0.1.0 (Initial)**: Multi-year NLCD processing, buffer creation, landscape metrics
