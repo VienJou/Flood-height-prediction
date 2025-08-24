@@ -1,0 +1,17 @@
+# Core Geospatial Libraries
+rasterio
+geopandas
+pylandstats
+shapely
+
+# Data Science & ML Libraries
+pandas
+numpy
+scipy
+scikit-learn
+umap-learn
+torch
+
+# Visualization & Progress Libraries
+matplotlib
+tqdm
